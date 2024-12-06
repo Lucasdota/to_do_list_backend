@@ -4,16 +4,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.lucasdota.todolist.dtos.AuthRequest;
-import com.lucasdota.todolist.dtos.RegisterRequest;
+import com.lucasdota.todolist.dtos.AuthDTO;
+import com.lucasdota.todolist.dtos.LoginResponseDTO;
+import com.lucasdota.todolist.dtos.RegisterDTO;
 import com.lucasdota.todolist.entities.User;
 import com.lucasdota.todolist.repositories.UserRepository;
-import com.lucasdota.todolist.services.JwtTokenService;
+import com.lucasdota.todolist.services.TokenService;
 
 import jakarta.validation.Valid;
 
@@ -21,43 +23,30 @@ import jakarta.validation.Valid;
 @RequestMapping("auth")
 public class AuthController {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private JwtTokenService jwtTokenService;
-    @Autowired
-    private UserDetailsService userDetailsService;
-		@Autowired
-		private UserRepository userRepository;
+	@Autowired
+	private AuthenticationManager authManager;
+	@Autowired
+	private UserRepository repository;
+	@Autowired
+	private TokenService tokenService;
 
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody @Valid AuthRequest authRequest) {
-        try {
-            // Authenticate the user
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword())
-            );
+	@PostMapping("/login")
+	public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid AuthDTO data) {
+		var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
+		var auth = this.authManager.authenticate(usernamePassword);
+		var token = tokenService.generateToken((User) auth.getPrincipal());
 
-            // Load user details
-            UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.getEmail());
-
-            // Generate JWT token
-            String jwtToken = jwtTokenService.generateToken(userDetails.getUsername());
-
-            return ResponseEntity.ok(jwtToken);
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body("Invalid email or password");
-        }
-    }
+		return ResponseEntity.ok(new LoginResponseDTO(token));
+	}
 
 	@PostMapping("/register")
-	public ResponseEntity<String> register(@RequestBody @Valid RegisterRequest registerRequest)	{
-		if (this.userRepository.findByEmail(registerRequest.getEmail()) != null) return ResponseEntity.badRequest().build();
+	public ResponseEntity<String> register(@RequestBody @Valid RegisterDTO data) {
+		if (this.repository.findByEmail(data.email()) != null) return ResponseEntity.badRequest().build();
 
-		String encryptedPassword = new BCryptPasswordEncoder().encode(registerRequest.getPassword());
-		User newUser = new User(registerRequest.getEmail(), encryptedPassword);
-
-		this.userRepository.save(newUser);
+		String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
+		User newUser = new User(data.email(), encryptedPassword);
+		
+		this.repository.save(newUser);
 		return ResponseEntity.ok().build();
 	}
 }
