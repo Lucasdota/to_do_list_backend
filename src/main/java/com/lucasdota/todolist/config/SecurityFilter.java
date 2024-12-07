@@ -28,23 +28,30 @@ public class SecurityFilter extends OncePerRequestFilter {
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
-		var token = this.recoverToken(request);
-		if (token != null) {
-			var email = tokenService.validateToken(token);
-			UserDetails user = repository.findByEmail(email);	 
-			
-			var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-			SecurityContextHolder.getContext().setAuthentication(auth);
-		}
-		filterChain.doFilter(request, response);
+					throws ServletException, IOException {
+			String token = recoverToken(request);
+			if (token != null) {
+					String email = tokenService.validateToken(token);
+					if (email != null) { // check if the token is valid and email is retrieved
+							UserDetails user = repository.findByEmail(email);
+							if (user != null) {
+									var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+									SecurityContextHolder.getContext().setAuthentication(auth);
+							} else {
+									logger.warn("User not found for email: " + email);
+							}
+					} else {
+							logger.warn("Invalid token: " + token);
+					}
+			}
+			filterChain.doFilter(request, response);
 	}
 
 	private String recoverToken(HttpServletRequest request) {
-		var authHeader = request.getHeader("Authorization");
-		if (authHeader == null) return null;
-		// replace to get only the token value from the header
-		return authHeader.replace("Bearer ", "");
+		String authHeader = request.getHeader("Authorization");
+		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+				return null;
+		}
+		return authHeader.substring(7); // extract the token value
 	}
-	
 }
