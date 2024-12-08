@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lucasdota.todolist.dtos.AuthDTO;
-import com.lucasdota.todolist.dtos.LoginResponseDTO;
 import com.lucasdota.todolist.dtos.RegisterDTO;
 import com.lucasdota.todolist.entities.User;
 import com.lucasdota.todolist.repositories.UserRepository;

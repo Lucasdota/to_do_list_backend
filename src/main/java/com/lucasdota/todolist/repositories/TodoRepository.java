@@ -10,6 +10,6 @@ import com.lucasdota.todolist.entities.Todo;
 public interface TodoRepository extends JpaRepository<Todo, Long> {
 
 	Optional<Todo> findByName(String name);
-	List<Todo> findByUserId(Long id);
+	List<Todo> findByUserId(Long userId);
 	
 }
