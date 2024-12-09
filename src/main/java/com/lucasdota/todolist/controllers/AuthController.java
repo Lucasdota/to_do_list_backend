@@ -49,7 +49,8 @@ public class AuthController {
 
 		Cookie cookie = new Cookie("JWT", token);
 		cookie.setHttpOnly(true);
-		cookie.setSecure(true);
+		cookie.setSecure(false);
+		cookie.setDomain("localhost");
 		cookie.setPath("/");
 		cookie.setMaxAge(86400);
 		response.addCookie(cookie);
@@ -70,7 +71,8 @@ public class AuthController {
 
 		Cookie cookie = new Cookie("JWT", token);
     cookie.setHttpOnly(true);
-    cookie.setSecure(true);
+    cookie.setSecure(false);
+		cookie.setDomain("localhost");
     cookie.setPath("/");
     cookie.setMaxAge(86400);
     response.addCookie(cookie);
@@ -82,7 +84,8 @@ public class AuthController {
 	public ResponseEntity<String> logout(HttpServletResponse response) {
 		Cookie cookie = new Cookie("JWT", null);
 		cookie.setHttpOnly(true);
-		cookie.setSecure(true);
+		cookie.setSecure(false);
+		cookie.setDomain("localhost");
 		cookie.setPath("/");
 		cookie.setMaxAge(0);
 		response.addCookie(cookie);
