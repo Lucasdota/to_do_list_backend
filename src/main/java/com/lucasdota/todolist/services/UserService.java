@@ -12,6 +12,7 @@ import com.lucasdota.todolist.repositories.TodoRepository;
 import com.lucasdota.todolist.repositories.UserRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 
 @Service
 public class UserService {
@@ -31,7 +32,7 @@ public class UserService {
 		return userRepository.findAll();
 	}
 
-	public User findByEmail(String email) {
+	public UserDetails findByEmail(String email) {
 		return userRepository.findByEmail(email);
 	}
 
@@ -80,6 +81,12 @@ public class UserService {
         todo.toggleDone();
         return todoRepository.save(todo);
     }
+
+		public User getUserById(Long userId) {
+			return userRepository.findById(userId)
+            .map(user -> user)
+            .orElse(null);
+		}
 
 	//public void deleteTodoForUser(Long userId, Long todoId) {
 		//User user = userRepository.findById(userId)

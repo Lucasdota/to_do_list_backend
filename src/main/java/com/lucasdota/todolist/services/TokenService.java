@@ -32,7 +32,7 @@ public class TokenService {
 			String token = JWT.create()
 											.withIssuer("auth-api")
 											.withSubject(user.getEmail())
-											.withExpiresAt(LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00")))
+											.withExpiresAt(LocalDateTime.now().plusHours(100).toInstant(ZoneOffset.of("-03:00")))
 											.sign(algorithm);
 			return token;								
 		} catch (JWTCreationException e) {
@@ -41,6 +41,7 @@ public class TokenService {
 	}
 
 	public String validateToken(String token) {		
+		logger.warn("validateToken: " + token);
 		try {
 			String decodedSecret = decodeSecret(secret);
 			Algorithm algorithm = Algorithm.HMAC256(decodedSecret);

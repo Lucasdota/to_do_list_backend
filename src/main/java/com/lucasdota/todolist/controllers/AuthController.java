@@ -1,5 +1,7 @@
 package com.lucasdota.todolist.controllers;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,7 +26,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("auth")
 public class AuthController {
-
+	protected final Log logger = LogFactory.getLog(getClass());
 	@Autowired
 	private AuthenticationManager authManager;
 	@Autowired
@@ -52,7 +54,7 @@ public class AuthController {
 		cookie.setSecure(false);
 		cookie.setDomain("localhost");
 		cookie.setPath("/");
-		cookie.setMaxAge(86400);
+		cookie.setMaxAge(806400);
 		response.addCookie(cookie);
 
 		return ResponseEntity.ok("Login successful");
@@ -72,9 +74,8 @@ public class AuthController {
 		Cookie cookie = new Cookie("JWT", token);
     cookie.setHttpOnly(true);
     cookie.setSecure(false);
-		cookie.setDomain("localhost");
     cookie.setPath("/");
-    cookie.setMaxAge(86400);
+    cookie.setMaxAge(806400);
     response.addCookie(cookie);
 
 		return ResponseEntity.ok("Account create successful");
@@ -89,7 +90,6 @@ public class AuthController {
 		cookie.setPath("/");
 		cookie.setMaxAge(0);
 		response.addCookie(cookie);
-		
 		return ResponseEntity.ok("Logout successful");
 	}
 }
