@@ -1,27 +1,24 @@
 package com.lucasdota.todolist.controllers;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.lucasdota.todolist.dtos.TodoDTO;
-import com.lucasdota.todolist.entities.Todo;
+import com.lucasdota.todolist.dtos.UserDTO;
+import com.lucasdota.todolist.dtos.UserResponseDTO;
 import com.lucasdota.todolist.entities.User;
 import com.lucasdota.todolist.services.UserService;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
 
 import org.apache.commons.logging.Log;
@@ -42,7 +39,7 @@ public class UserController {
 	}
 
 	private String getEmailFromJwt(String token) {
-		logger.warn("Token on UserController:" + token);
+		logger.warn("{getEmailFromJwt} Token on UserController:" + token);
 		try {
 			Claims claims = Jwts.parser()
 							.setSigningKey(secret)
@@ -56,12 +53,29 @@ public class UserController {
 			logger.error("Error parsing JWT token: " + e.getMessage());
 			throw new ParsingException("Error Parsing JWT");
 		}
-}
+	}
+
+	private Long getIdFromJwt(String token) {
+		try {
+			Claims claims = Jwts.parser()
+							.setSigningKey(secret)
+							.parseClaimsJws(token)
+							.getBody();
+			Long userId = claims.get("userId", Long.class);	
+			return userId;			
+		}	catch (ExpiredJwtException e) {
+			logger.warn("JWT token is expired: " + e.getMessage());
+			throw new TokenExpiredException("JWT token is expired", null);
+		} catch (Exception e) {
+			logger.error("Error parsing JWT token: " + e.getMessage());
+			throw new ParsingException("Error Parsing JWT");
+		}
+	}
 
 	@GetMapping
-	public ResponseEntity<UserDetails> getUser(@CookieValue(value = "JWT", required = false) String jwt) {
+	public ResponseEntity<UserResponseDTO> getUser(@CookieValue(value = "JWT", required = false) String jwt) {
 		if (jwt == null) {
-			logger.warn("JWT token is null");
+			logger.warn("{getUser} JWT token is null");
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
 
@@ -69,30 +83,26 @@ public class UserController {
 		try {
 			userEmail = getEmailFromJwt(jwt);
 		} catch (InternalException | TokenExpiredException e) {
-			logger.warn("Failed to extract email from JWT: " + e.getMessage());
+			logger.warn("{getUser} Failed to extract email from JWT: " + e.getMessage());
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
 
-		logger.info("Extracted userEmail: " + userEmail);
-		UserDetails userDetails = userService.findByEmail(userEmail);
-    logger.info("userDetails: " + userDetails);
-    if (userDetails != null) {
-      return ResponseEntity.ok(userDetails);
+		logger.info("{getUser} Extracted userEmail: " + userEmail);
+		User user = (User) userService.findUserByEmail(userEmail);
+    if (user != null) {
+      UserResponseDTO response = new UserResponseDTO(user.getId(), user.getEmail(), user.getTodos());
+        return ResponseEntity.ok(response);
     } else {
-      logger.warn("User not found with email: " + userEmail);
+      logger.warn("{getUser} User not found with email: " + userEmail);
       return ResponseEntity.notFound().build();
     }
 	}
 
-	@PostMapping("/create-to-do")
-	public ResponseEntity<String> createTodo(@RequestBody @Valid TodoDTO data) {
-		logger.warn("userId: " + data.userId());
-		User user = userService.getUserById(data.userId());	
-		if (user == null) {
-			return ResponseEntity.notFound().build();
-		}
-		Todo todo = new Todo(data.name(), data.description());
-		userService.createTodoForUser(user, todo);
-		return ResponseEntity.status(HttpStatus.CREATED).body("Todo created successfully");
+	@DeleteMapping
+	public ResponseEntity<String> deleteUser(@CookieValue(value = "JWT", required = false) String jwt) {
+		Long userId = getIdFromJwt(jwt);
+		logger.info("extracted USERID: "+userId);
+		userService.delete(userId);
+		return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully");
 	}
 }

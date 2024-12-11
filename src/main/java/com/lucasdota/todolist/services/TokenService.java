@@ -30,9 +30,10 @@ public class TokenService {
 			String decodedSecret = decodeSecret(secret);
       Algorithm algorithm = Algorithm.HMAC256(decodedSecret);
 			String token = JWT.create()
-											.withIssuer("auth-api")
+											.withIssuer("auth-api")										
 											.withSubject(user.getEmail())
-											.withExpiresAt(LocalDateTime.now().plusHours(100).toInstant(ZoneOffset.of("-03:00")))
+											.withClaim("userId", user.getId())
+											.withExpiresAt(LocalDateTime.now().plusHours(100).toInstant(ZoneOffset.of("-03:00")))						
 											.sign(algorithm);
 			return token;								
 		} catch (JWTCreationException e) {

@@ -11,4 +11,5 @@ import com.lucasdota.todolist.entities.User;
 public interface UserRepository extends JpaRepository<User, String> {
 	UserDetails findByEmail(String email);
 	Optional<User> findById(Long id);
+	void deleteById(Long id);
 }

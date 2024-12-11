@@ -1,5 +1,7 @@
 package com.lucasdota.todolist.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -27,6 +29,7 @@ public class Todo {
 	@NotBlank(message = "Description cannot be empty")
 	private String description;
 	private boolean done;
+	@JsonBackReference
 	@ManyToOne
 	@JoinColumn(name = "user_id", nullable = false)
 	@NotNull(message = "User cannot be null")

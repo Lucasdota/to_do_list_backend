@@ -1,4 +1,4 @@
 package com.lucasdota.todolist.dtos;
 
-public record TodoDTO(Long todoId) {
+public record UserDTO(Long id) {
 }

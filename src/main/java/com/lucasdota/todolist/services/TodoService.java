@@ -1,12 +1,9 @@
 package com.lucasdota.todolist.services;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.lucasdota.todolist.entities.Todo;
+import com.lucasdota.todolist.entities.User;
 import com.lucasdota.todolist.repositories.TodoRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -18,40 +15,27 @@ public class TodoService {
 	public TodoService(TodoRepository todoRepository) {
 		this.todoRepository = todoRepository;
 	}
-	
-	public Todo create(String name, String desc) {
 
-		Todo todo = new Todo(name, desc);
-
-		// Check if a task with the same name already exists
-		if (todoRepository.findByName(todo.getName()).isPresent()) {
-			throw new IllegalArgumentException("A task with the name '" + todo.getName() + "' already exists.");
-		}
-
+	public Todo create(User user, Todo todo) {
+		todo.setUser(user);
 		return todoRepository.save(todo);
 	}
 
-	public List<Todo> list() {
-		Sort sort = Sort.by("id");
-		return todoRepository.findAll(sort);
+	public Todo update(Long todoId) {
+		Todo todo = todoRepository.findById(todoId)
+							.orElseThrow(() -> new EntityNotFoundException("Todo not found with id: " + todoId));
+		todo.toggleDone();
+		return todoRepository.save(todo);
 	}
 
-	public Optional<Todo> findById(Long id) {
-        return todoRepository.findById(id);
-    }
+	public void delete(Long todoId) {
+		Todo todo = todoRepository.findById(todoId)
+				.orElseThrow(() -> new EntityNotFoundException("Todo not found with id: " + todoId));
 
-	public Optional<Todo> update(Long id, Todo todo) {
-		if (!todoRepository.existsById(id)) {
-        	return Optional.empty();
-		}
-		todo.setId(id);
-		return Optional.of(todoRepository.save(todo));
-	}
+		// Remove the Todo from the User's collection
+		//user.getTodos().remove(todo); // This is crucial to maintain the relationship
+		//userRepository.save(user); // Save the updated User entity to reflect the change
 
-	public void delete(Long id) {
-		if (!todoRepository.existsById(id)) {
-			throw new EntityNotFoundException("Todo not found with id: " + id);
-		}
-		todoRepository.deleteById(id);
+		todoRepository.delete(todo);
 	}
 }
