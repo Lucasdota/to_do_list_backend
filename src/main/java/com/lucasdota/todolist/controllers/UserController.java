@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.lucasdota.todolist.dtos.UserDTO;
 import com.lucasdota.todolist.dtos.UserResponseDTO;
 import com.lucasdota.todolist.entities.User;
 import com.lucasdota.todolist.services.UserService;
@@ -18,8 +17,8 @@ import com.lucasdota.todolist.services.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import jakarta.validation.Valid;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -99,10 +98,17 @@ public class UserController {
 	}
 
 	@DeleteMapping
-	public ResponseEntity<String> deleteUser(@CookieValue(value = "JWT", required = false) String jwt) {
+	public ResponseEntity<String> deleteUser(@CookieValue(value = "JWT", required = false) String jwt, HttpServletResponse response) {
 		Long userId = getIdFromJwt(jwt);
 		logger.info("extracted USERID: "+userId);
 		userService.delete(userId);
+		Cookie cookie = new Cookie("JWT", null);
+		cookie.setHttpOnly(true);
+		cookie.setSecure(false);
+		cookie.setDomain("localhost");
+		cookie.setPath("/");
+		cookie.setMaxAge(0);
+		response.addCookie(cookie);
 		return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully");
 	}
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.lucasdota.todolist.entities.Todo;
 import com.lucasdota.todolist.entities.User;
@@ -30,10 +31,10 @@ public class UserService {
 		return userRepository.findByEmail(email);
 	}
 
+	@Transactional
 	public void delete(Long id) {
-		// First, delete all Todos associated with the user
+		// delete all Todos associated with the user
     List<Todo> todos = todoRepository.findByUserId(id);
-		
     todoRepository.deleteAll(todos);
 		userRepository.deleteById(id);
 	}

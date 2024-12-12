@@ -31,11 +31,6 @@ public class TodoService {
 	public void delete(Long todoId) {
 		Todo todo = todoRepository.findById(todoId)
 				.orElseThrow(() -> new EntityNotFoundException("Todo not found with id: " + todoId));
-
-		// Remove the Todo from the User's collection
-		//user.getTodos().remove(todo); // This is crucial to maintain the relationship
-		//userRepository.save(user); // Save the updated User entity to reflect the change
-
 		todoRepository.delete(todo);
 	}
 }
