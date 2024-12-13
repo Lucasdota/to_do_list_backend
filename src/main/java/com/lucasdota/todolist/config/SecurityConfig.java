@@ -35,6 +35,7 @@ public class SecurityConfig {
 						.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Use stateless session
 				)
 				.authorizeHttpRequests(authorize -> authorize
+					.requestMatchers("/h2-console/**").permitAll() 
 					.requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
 					.requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
 					.requestMatchers(HttpMethod.POST, "/auth/logout").permitAll()
