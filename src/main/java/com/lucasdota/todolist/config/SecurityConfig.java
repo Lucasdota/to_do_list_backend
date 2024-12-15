@@ -30,12 +30,11 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http
 				.csrf(csrf -> csrf.disable())
-				.cors(cors -> cors.configurationSource(corsConfigurationSource())) // Configure CORS
+				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				.sessionManagement(session -> session
-						.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Use stateless session
+						.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 				)
 				.authorizeHttpRequests(authorize -> authorize
-					.requestMatchers("/h2-console/**").permitAll() 
 					.requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
 					.requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
 					.requestMatchers(HttpMethod.POST, "/auth/logout").permitAll()
@@ -57,10 +56,10 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 			CorsConfiguration configuration = new CorsConfiguration();
-			configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Allow frontend URL
-			configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allowed HTTP methods
-			configuration.setAllowedHeaders(List.of("*")); // Allow all headers
-			configuration.setAllowCredentials(true); // Allow cookies (JWT or session tokens)
+			configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+			configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+			configuration.setAllowedHeaders(List.of("*"));
+			configuration.setAllowCredentials(true);
 
 			UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 			source.registerCorsConfiguration("/**", configuration);

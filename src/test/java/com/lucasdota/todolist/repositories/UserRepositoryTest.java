@@ -2,19 +2,20 @@ package com.lucasdota.todolist.repositories;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.test.context.ActiveProfiles;
+import org.mockito.Mockito;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+
 import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Optional;
 
 import com.lucasdota.todolist.entities.User;
 
-@DataJpaTest
-@ActiveProfiles("test")
+@SpringBootTest
 public class UserRepositoryTest {
 
-	@Autowired
+	@MockitoBean
 	private UserRepository userRepository;
 
 	private User testUser;
@@ -26,10 +27,52 @@ public class UserRepositoryTest {
   }
 
 	@Test
-  public void testFindByEmail() {
-    UserDetails foundUser  = userRepository.findByEmail(testUser.getEmail());
+  public void testFindByEmailSuccess() {
+		Mockito.when(userRepository.findByEmail(testUser.getEmail())).thenReturn(testUser);
+    User foundUser = userRepository.findByEmail(testUser.getEmail());      
     assertThat(foundUser).isNotNull();
     assertThat(foundUser.getUsername()).isEqualTo(testUser.getEmail());
   }
+
+	@Test
+  public void testFindByEmailFail() {
+    User foundUser = userRepository.findByEmail("failemail@gmail.com");      
+    assertThat(foundUser).isNull();
+  }
+
+	@Test
+	public void testFindByIdSuccess() {
+		Mockito.when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+		Optional<User> foundUser = userRepository.findById(testUser.getId());
+		assertThat(foundUser).isNotNull();
+	}
+
+	@Test
+	public void testFindByIdFail() {
+		Optional<User> foundUser = userRepository.findById(2L);
+		assertThat(foundUser).isEmpty();
+	}
+
+	@Test
+	public void testDeleteByIdSuccess() {
+		Optional<User> foundUser  = userRepository.findById(testUser.getId());
+    assertThat(foundUser).isNotNull();
+
+    userRepository.deleteById(testUser.getId());
+
+    Optional<User> deletedUser  = userRepository.findById(testUser.getId());
+    assertThat(deletedUser ).isEmpty();
+	}
+
+	@Test
+	public void testDeleteByIdFail() {
+		Optional<User> foundUser = userRepository.findById(testUser.getId());
+		assertThat(foundUser).isNotNull();
+
+		userRepository.deleteById(2L);
+
+		Optional<User> deletedUser = userRepository.findById(testUser.getId());
+		assertThat(deletedUser).isNotNull();
+	}
 
 }

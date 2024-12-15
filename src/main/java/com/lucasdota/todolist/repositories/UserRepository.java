@@ -8,8 +8,8 @@ import org.springframework.stereotype.Repository;
 import com.lucasdota.todolist.entities.User;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, String> {
-	UserDetails findByEmail(String email);
+public interface UserRepository extends JpaRepository<User, Long> {
+	User findByEmail(String email);
 	Optional<User> findById(Long id);
 	void deleteById(Long id);
 }

@@ -34,14 +34,22 @@ public class TodoController {
 
 	@PostMapping
 	public ResponseEntity<String> createTodo(@RequestBody @Valid CreateTodoDTO data) {
-		logger.warn("userId: " + data.userId());
-		User user = userService.getUserById(data.userId());	
-		if (user == null) {
-			return ResponseEntity.notFound().build();
-		}
-		Todo todo = new Todo(data.name(), data.description());
-		todoService.create(user, todo);
-		return ResponseEntity.status(HttpStatus.CREATED).body("Todo created successfully");
+    try {
+        logger.warn("userId: " + data.userId());
+        User user = userService.getUserById(data.userId());
+        
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        Todo todo = new Todo(data.name(), data.description());
+        todoService.create(user, todo);
+        
+        return ResponseEntity.status(HttpStatus.CREATED).body("Todo created successfully");
+    } catch (Exception e) {
+        logger.error("Error creating todo: ", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while creating the todo");
+    }
 	}
 
 	@PutMapping
