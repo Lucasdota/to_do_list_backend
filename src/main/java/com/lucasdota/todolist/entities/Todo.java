@@ -67,7 +67,7 @@ public class Todo {
 	public void setUser(User user) {
 		this.user = user;
 	}
-	public boolean isDone() {
+	public boolean getDone() {
 		return done;
 	}
 	public void toggleDone() {

@@ -24,7 +24,7 @@ public class TodoService {
 	public Todo update(Long todoId) {
 		Todo todo = todoRepository.findById(todoId)
 							.orElseThrow(() -> new EntityNotFoundException("Todo not found with id: " + todoId));
-		todo.toggleDone();
+		todo.toggleDone();					
 		return todoRepository.save(todo);
 	}
 
