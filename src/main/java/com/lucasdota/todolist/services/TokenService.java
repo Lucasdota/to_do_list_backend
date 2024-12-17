@@ -18,12 +18,12 @@ import java.util.Base64;
 public class TokenService {
 	protected final Log logger = LogFactory.getLog(getClass());
 	@Value("${jwt.secret}")
-	private String secret;
+	public String secret;
 
 	private String decodeSecret(String encodedSecret) {
-        byte[] decodedBytes = Base64.getDecoder().decode(encodedSecret);
-        return new String(decodedBytes);
-    }
+    byte[] decodedBytes = Base64.getDecoder().decode(encodedSecret);
+    return new String(decodedBytes);
+  }
 
 	public String generateToken(User user) {
 		try {

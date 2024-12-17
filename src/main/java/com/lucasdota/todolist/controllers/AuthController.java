@@ -38,11 +38,11 @@ public class AuthController {
 	public ResponseEntity<String> login(@RequestBody @Valid AuthDTO data, @CookieValue(value = "JWT", required = false) String jwtCookie, HttpServletResponse response) {
 		// check if the JWT cookie exists and is valid
 		if (jwtCookie != null) {
-				if (tokenService.validateToken(jwtCookie) != null) {
-						return ResponseEntity.ok("Login successful with existing token");
-				} else {
-						return ResponseEntity.badRequest().body("Invalid JWT token");
-				}
+			if (tokenService.validateToken(jwtCookie) != null) {
+				return ResponseEntity.ok("Login successful with existing token");
+			} else {
+				return ResponseEntity.badRequest().body("Invalid JWT token");
+			}
 		}
 
 		var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
