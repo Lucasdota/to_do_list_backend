@@ -29,13 +29,12 @@ public class TokenService {
 		try {
 			String decodedSecret = decodeSecret(secret);
       Algorithm algorithm = Algorithm.HMAC256(decodedSecret);
-			String token = JWT.create()
+			return JWT.create()
 											.withIssuer("auth-api")										
 											.withSubject(user.getEmail())
 											.withClaim("userId", user.getId())
 											.withExpiresAt(LocalDateTime.now().plusHours(100).toInstant(ZoneOffset.of("-03:00")))						
-											.sign(algorithm);
-			return token;								
+											.sign(algorithm);							
 		} catch (JWTCreationException e) {
 			throw new RuntimeException("Error while generating token", e);	
 		}

@@ -34,7 +34,6 @@ public class User implements UserDetails {
 	@NotBlank(message = "Password is mandatory")
 	@Column(name = "password", nullable = false)
 	private String password;
-	@JsonIgnore
 	@JsonManagedReference
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Todo> todos = new ArrayList<>();

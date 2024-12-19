@@ -53,7 +53,6 @@ public class SecurityFilter extends OncePerRequestFilter {
 
 	private String recoverToken(HttpServletRequest request) {
 		Cookie[] cookies = request.getCookies();
-		logger.warn("Request on recoverToken: " + request);
 		if (cookies != null) {
 				for (Cookie cookie : cookies) {
 						if ("JWT".equals(cookie.getName())) {
