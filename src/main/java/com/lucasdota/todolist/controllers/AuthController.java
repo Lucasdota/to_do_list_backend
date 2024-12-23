@@ -1,7 +1,5 @@
 package com.lucasdota.todolist.controllers;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.lucasdota.todolist.dtos.AuthDTO;
+import com.lucasdota.todolist.dtos.LoginDTO;
 import com.lucasdota.todolist.dtos.RegisterDTO;
 import com.lucasdota.todolist.entities.User;
 import com.lucasdota.todolist.repositories.UserRepository;
@@ -26,7 +24,6 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("auth")
 public class AuthController {
-	protected final Log logger = LogFactory.getLog(getClass());
 	@Autowired
 	private AuthenticationManager authManager;
 	@Autowired
@@ -35,8 +32,7 @@ public class AuthController {
 	private TokenService tokenService;
 
 	@PostMapping("/login")
-	public ResponseEntity<String> login(@RequestBody @Valid AuthDTO data, @CookieValue(value = "JWT", required = false) String jwtCookie, HttpServletResponse response) {
-		// check if the JWT cookie exists and is valid
+	public ResponseEntity<String> login(@RequestBody @Valid LoginDTO data, @CookieValue(value = "JWT", required = false) String jwtCookie, HttpServletResponse response) {
 		if (jwtCookie != null) {
 			if (tokenService.validateToken(jwtCookie) != null) {
 				return ResponseEntity.ok("Login successful with existing token");
@@ -51,12 +47,9 @@ public class AuthController {
 
 		Cookie cookie = new Cookie("JWT", token);
 		cookie.setHttpOnly(true);
-		cookie.setSecure(false);
-		cookie.setDomain("localhost");
 		cookie.setPath("/");
 		cookie.setMaxAge(806400);
 		response.addCookie(cookie);
-
 		return ResponseEntity.ok("Login successful");
 	}
 
@@ -73,7 +66,6 @@ public class AuthController {
 
 		Cookie cookie = new Cookie("JWT", token);
     cookie.setHttpOnly(true);
-    cookie.setSecure(false);
     cookie.setPath("/");
     cookie.setMaxAge(806400);
     response.addCookie(cookie);
@@ -84,6 +76,8 @@ public class AuthController {
 	@PostMapping("/logout")
 	public ResponseEntity<String> logout(HttpServletResponse response) {
 		Cookie cookie = new Cookie("JWT", null);
+		cookie.setHttpOnly(true);
+    cookie.setPath("/");
 		cookie.setMaxAge(0);
 		response.addCookie(cookie);
 		return ResponseEntity.ok("Logout successful");

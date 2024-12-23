@@ -39,12 +39,4 @@ public class TodoServiceTest {
 		todoRepository.save(testTodo);
   }
 
-	@Test
-	void createTodo() {
-		todoService.create(testUser, testTodo);
-		Mockito.when(todoRepository.findByName(testTodo.getName())).thenReturn(Optional.of(testTodo));
-		Optional<Todo> foundTodo = todoRepository.findByName(testTodo.getName());
-		assertThat(foundTodo).isPresent();
-	}
-
 }

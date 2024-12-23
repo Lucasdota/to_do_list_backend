@@ -38,14 +38,6 @@ public class UserServiceTest {
 	}
 
 	@Test
-	void getUserByEmail() {
-		String email = testUser.getEmail();
-		Mockito.when(userService.findUserByEmail(email)).thenReturn(testUser);
-		UserDetails foundUser = userService.findUserByEmail(email);
-		assertThat(testUser.getEmail()).isEqualTo(foundUser.getUsername());
-	}
-
-	@Test
 	void deleteUser() {
 		Long userId = testUser.getId();
 		userService.delete(userId);

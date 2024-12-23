@@ -25,41 +25,29 @@ public class SecurityFilter extends OncePerRequestFilter {
 	TokenService tokenService;
 
 	@Autowired
-	UserRepository repository;
+	UserRepository userRepository;
 
 	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-					throws ServletException, IOException {
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 		String token = recoverToken(request);
-		logger.warn("Token: " + token);
 		if (token != null) {
-				String email = tokenService.validateToken(token);
-				logger.warn("Email: " + email);
-				if (email != null) { // check if the token is valid and email is retrieved
-						UserDetails user = repository.findByEmail(email);
-						if (user != null) {
-								var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-								logger.warn("Auth: " + auth);
-								SecurityContextHolder.getContext().setAuthentication(auth);
-						} else {
-								logger.warn("User not found for email: " + email);
-						}
-				} else {
-						logger.warn("Invalid token: " + token);
-				}
-		}
-		filterChain.doFilter(request, response);
+			String email = tokenService.validateToken(token);
+			if (email != null) {
+				UserDetails user = userRepository.findByEmail(email);
+				if (user != null) {
+					var auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+					SecurityContextHolder.getContext().setAuthentication(auth);
+				} 
+			} 
+		} filterChain.doFilter(request, response);
 	}
 
 	private String recoverToken(HttpServletRequest request) {
 		Cookie[] cookies = request.getCookies();
 		if (cookies != null) {
-				for (Cookie cookie : cookies) {
-						if ("JWT".equals(cookie.getName())) {
-								return cookie.getValue();
-						}
-				}
-		}
-		return null;
-	}
+			for (Cookie cookie : cookies) {
+				if ("JWT".equals(cookie.getName())) return cookie.getValue();
+			}
+		} return null;
+  }
 }

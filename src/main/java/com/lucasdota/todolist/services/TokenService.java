@@ -16,44 +16,52 @@ import java.util.Base64;
 
 @Service
 public class TokenService {
-	protected final Log logger = LogFactory.getLog(getClass());
 	@Value("${jwt.secret}")
-	public String secret;
+    protected String secret;
 
-	private String decodeSecret(String encodedSecret) {
-    byte[] decodedBytes = Base64.getDecoder().decode(encodedSecret);
-    return new String(decodedBytes);
-  }
+    public Algorithm decodeSecret() {
+        byte[] decodedSecret = Base64.getDecoder().decode(secret);
+        return Algorithm.HMAC256(new String(decodedSecret));
+    }
 
-	public String generateToken(User user) {
-		try {
-			String decodedSecret = decodeSecret(secret);
-      Algorithm algorithm = Algorithm.HMAC256(decodedSecret);
-			return JWT.create()
-											.withIssuer("auth-api")										
-											.withSubject(user.getEmail())
-											.withClaim("userId", user.getId())
-											.withExpiresAt(LocalDateTime.now().plusHours(100).toInstant(ZoneOffset.of("-03:00")))						
-											.sign(algorithm);							
-		} catch (JWTCreationException e) {
-			throw new RuntimeException("Error while generating token", e);	
-		}
-	}
+    public String generateToken(User user) {
+        try {
+            Algorithm decodedAlgorithm = decodeSecret();
+            return JWT.create()
+                    .withIssuer("auth-api")
+                    .withSubject(user.getEmail())
+                    .withClaim("userId", user.getId())
+                    .withExpiresAt(LocalDateTime.now().plusHours(100).toInstant(ZoneOffset.of("-03:00")))
+                    .sign(decodedAlgorithm);
+        } catch (JWTCreationException e) {
+            throw new RuntimeException("Error while generating token: " +  e.getMessage());
+        }
+    }
 
-	public String validateToken(String token) {		
-		logger.warn("validateToken: " + token);
-		try {
-			String decodedSecret = decodeSecret(secret);
-			Algorithm algorithm = Algorithm.HMAC256(decodedSecret);
-			return JWT.require(algorithm)
-							.withIssuer("auth-api")
-							.build()
-							.verify(token)
-							.getSubject();
-		} catch (JWTVerificationException e) {
-			logger.error("Token verification failed: " + e.getMessage());
-			// spring security verifies that there's no user returned, so it automatically throws en unauthorized response
-			return "";
-		}
-	}
+    public String validateToken(String token) {
+        try {
+            Algorithm decodedAlgorithm = decodeSecret();
+            return JWT.require(decodedAlgorithm)
+                    .withIssuer("auth-api")
+                    .build()
+                    .verify(token)
+                    .getSubject(); // return email
+        } catch (JWTVerificationException e) {
+            throw new RuntimeException("Invalid token: " + e.getMessage());
+        }
+    }
+
+	    public Long getUserIdFromToken(String token) {
+        try {
+            Algorithm decodedAlgorithm = decodeSecret();
+            return JWT.require(decodedAlgorithm)
+                    .withIssuer("auth-api")
+                    .build()
+                    .verify(token)
+                    .getClaim("userId")
+                    .asLong();
+        } catch (JWTVerificationException e) {
+            throw new RuntimeException("Invalid token: " + e.getMessage());
+        }
+    }
 }
