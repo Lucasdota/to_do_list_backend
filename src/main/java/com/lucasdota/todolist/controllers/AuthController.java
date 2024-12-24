@@ -16,6 +16,7 @@ import com.lucasdota.todolist.dtos.RegisterDTO;
 import com.lucasdota.todolist.entities.User;
 import com.lucasdota.todolist.repositories.UserRepository;
 import com.lucasdota.todolist.services.TokenService;
+import com.lucasdota.todolist.services.UserService;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,7 +28,7 @@ public class AuthController {
 	@Autowired
 	private AuthenticationManager authManager;
 	@Autowired
-	private UserRepository repository;
+	private UserService userService;
 	@Autowired
 	private TokenService tokenService;
 
@@ -55,10 +56,9 @@ public class AuthController {
 
 	@PostMapping("/register")
 	public ResponseEntity<String> register(@RequestBody @Valid RegisterDTO data, HttpServletResponse response) {
-		if (this.repository.findByEmail(data.email()) != null) return ResponseEntity.badRequest().body("An account already exists with this email");
+		if (userService.getUserByEmail(data.email()) != null) return ResponseEntity.badRequest().body("An account already exists with this email");
 		String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
-		User newUser  = new User(data.email(), encryptedPassword);
-		this.repository.save(newUser);
+		userService.create(data.email(), encryptedPassword);
 		
 		var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
 		var auth = this.authManager.authenticate(usernamePassword);

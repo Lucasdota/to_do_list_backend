@@ -50,10 +50,12 @@ public class UserService {
      * Retrieves a user by their email address.
      *
      * @param email the email address of the user to retrieve
-     * @return an Optional containing the user details if found, or an empty Optional if not found
+     * @return null if not found, return email if found
      */
-    public Optional<UserDetails> getUserByEmail(String email) {
-        return Optional.of(userRepository.findByEmail(email));
+    public String getUserByEmail(String email) {
+        UserDetails user = userRepository.findByEmail(email);
+				if (user == null) return null; 
+				return user.getUsername();
     }
 
     /**

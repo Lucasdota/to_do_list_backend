@@ -18,7 +18,7 @@ import com.lucasdota.todolist.services.TodoService;
 @RestController
 @RequestMapping("todo")
 public class TodoController {
-	    @Autowired
+	  @Autowired
     TodoService todoService;
 
     @PostMapping
